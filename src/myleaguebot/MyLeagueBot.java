@@ -1,6 +1,10 @@
 package myleaguebot;
 
+import java.io.IOException;
 import java.util.Random;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,37 +18,58 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 public class MyLeagueBot extends TelegramLongPollingBot
 {
     @Override
-    public void onUpdateReceived(Update update) 
+    public void onUpdateReceived(Update update)
     {
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) 
         {
             // Set variables
             long chat_id = update.getMessage().getChatId();
+            String messageUpdate = update.getMessage().getText().toLowerCase();
             
-            if(update.getMessage().getText().toLowerCase().contains("hey angryleaguebot"))
+            if(messageUpdate.contains("hey angryleaguebot"))
             {
                 sendMessage("Fuck off.", chat_id);
             }
-            else if(update.getMessage().getText().toLowerCase().contains("runes"))
+            else if(messageUpdate.contains("runes"))
             {
                 sendMessage(getRunePhrase(), chat_id);
             }
-            else if(update.getMessage().getText().toLowerCase().contains("tilt"))
+            else if(messageUpdate.contains("tilt"))
             {
                 sendMessage(getTiltPhrase(), chat_id);
             }
-            else if(update.getMessage().getText().toLowerCase().contains("remove"))
+            else if(messageUpdate.contains("remove"))
             {
                 sendMessage("Yeah, you're wrong. IMHO, " + getRandomChamp() + " should be removed from the game. "
                         + "They aren't fun to play against and therefore all who main them can suck it.", chat_id);
             }
-            else if((update.getMessage().getText().toLowerCase().contains("league") && update.getMessage().getText().contains("?"))
-                  || (update.getMessage().getText().toLowerCase().contains("play") && (update.getMessage().getText().contains("?")
-                    || update.getMessage().getText().toLowerCase().contains("want") || update.getMessage().getText().toLowerCase().contains("wanna"))))
+            else if((messageUpdate.contains("league") && update.getMessage().getText().contains("?"))
+                  || (messageUpdate.contains("play") && (update.getMessage().getText().contains("?")
+                    || messageUpdate.contains("want") || messageUpdate.contains("wanna"))))
             {
                 sendMessage(getPlayPhrase(), chat_id);
             }
+            else if((messageUpdate.contains("rotation") || messageUpdate.contains("free")) && (messageUpdate.contains("who") || messageUpdate.contains("which"))) {
+            	Document freeRotation = null;
+				try {
+					freeRotation = Jsoup.connect("http://leagueoflegends.wikia.com/wiki/Free_champion_rotation#Classic").get();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+            	String champions = "";
+            	
+            	for(int i = 0; i < 13; i++)
+            	{
+            	champions += freeRotation.body().select(".free_champion_rotation li").get(i).child(0).attr("data-champion");
+            	champions += ", ";
+            	}
+            	champions += " and " + freeRotation.body().select(".free_champion_rotation li").get(13).child(0).attr("data-champion");
+            	
+            	sendMessage("The current free champions are " + champions + ".", chat_id);
+            }
+            
         }
     }
 
@@ -74,6 +99,7 @@ public class MyLeagueBot extends TelegramLongPollingBot
                 {
                     e.printStackTrace();
                 }
+                System.out.println("Sent a message");
     }
     
     public String getRunePhrase()
