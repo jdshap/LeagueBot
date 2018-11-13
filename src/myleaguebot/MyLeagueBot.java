@@ -13,7 +13,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 /**
  * 
  * 
- * @author Stefan Cornelius
+ * @author Stefan Cornelius, Joseph Shapiro
  */
 public class MyLeagueBot extends TelegramLongPollingBot
 {
